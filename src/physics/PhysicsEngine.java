@@ -33,6 +33,11 @@ public class PhysicsEngine {
      * @param delta: the delta to apply (the time between this update and the previous one usually)
      */
     public void update(float delta) {
+        // update objects
+        for (PhysicObject object : objects)
+            object.update(delta);
+
+        // look for collisions
         for (PhysicObject firstObject : objects)
             for (PhysicObject secondObject : objects) {
                 if(firstObject != secondObject) {
