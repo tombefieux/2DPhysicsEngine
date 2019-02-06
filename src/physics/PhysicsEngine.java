@@ -46,7 +46,6 @@ public class PhysicsEngine {
                         firstObject.collisionTriggeredOnSide(result, secondObject);
                 }
             }
-
     }
 
     /**
@@ -61,53 +60,68 @@ public class PhysicsEngine {
 
         Side result = null;
 
-        float x1 = (float) firstObject.getPosition().getX(),
-                y1 = (float) firstObject.getPosition().getY(),
-                x2 = (float) secondObject.getPosition().getX(),
-                y2 = (float) secondObject.getPosition().getY();
+        double x1 = firstObject.getPosition().getX(),
+                y1 = firstObject.getPosition().getY(),
+                x2 = secondObject.getPosition().getX(),
+                y2 = secondObject.getPosition().getY();
 
-        float w1 = firstObject.getHitbox().width,
-                h1 = firstObject.getHitbox().height,
-                w2 = secondObject.getHitbox().width,
-                h2 = secondObject.getHitbox().height;
+        double w1 = firstObject.getHitbox().getWidth(),
+                h1 = firstObject.getHitbox().getHeight(),
+                w2 = secondObject.getHitbox().getWidth(),
+                h2 = secondObject.getHitbox().getHeight();
 
-        // ---- bottom or top
+        // bottom
         if (
-                (x1 > x2 && x1 + w1 < x2 + w2) ||
-                (x1 >= x2 && x1 < x2 + w2) ||
-                (x1 + w1 > x2 && x1 + w1 <= x2 + w2) ||
-                (x1 < x2 && x1 + w1 > x2 + w2)
-        ) {
-            // bottom
-            if (y1 <= y2 + h2 && y1 > y2)
-                result = Side.BOTTOM;
+                (
+                    (x1 > x2 && x1 + w1 < x2 + w2) ||
+                    (x1 >= x2 && x1 < x2 + w2) ||
+                    (x1 + w1 > x2 && x1 + w1 <= x2 + w2) ||
+                    (x1 < x2 && x1 + w1 > x2 + w2)
+                ) &&
+                    (y1 <= y2 + h2 && y1 > y2)
+        )
+            result = Side.BOTTOM;
 
-            // top
-            else if (y1 + h1 > y2 && y1 + h1 < y2 + h2)
-                result = Side.TOP;
-        }
+        // top
+        else if (
+                (
+                    (x1 > x2 && x1 + w1 < x2 + w2) ||
+                    (x1 >= x2 && x1 < x2 + w2) ||
+                    (x1 + w1 > x2 && x1 + w1 <= x2 + w2) ||
+                    (x1 < x2 && x1 + w1 > x2 + w2)
+                ) &&
+                    (y1 + h1 > y2 && y1 + h1 < y2 + h2)
+        )
+            result = Side.TOP;
 
-        // ---- left or right
-        if (
-                (y1 + h1 > y2 + h2 && y1 < y2) ||
-                (y1 + h1 < y2 + h2 && y1 > y2) ||
-                (y1 >= y2 && y1 < y2 + h2) ||
-                (y1 + h1 > y2 && y1 + h1 <= y2 + h2)
-        ) {
-            // left
-            if (x1 < x2 + w2 && x1 > x2)
-                result = Side.LEFT;
+        // left
+        else if (
+                (
+                    (y1 + h1 > y2 + h2 && y1 < y2) ||
+                    (y1 + h1 < y2 + h2 && y1 > y2) ||
+                    (y1 >= y2 && y1 < y2 + h2) ||
+                    (y1 + h1 > y2 && y1 + h1 <= y2 + h2)
+                ) &&
+                    (x1 < x2 + w2 && x1 > x2)
+        )
+            result = Side.LEFT;
 
-            // right
-            else if (x1 + w1 >= x2 && x1 + w1 < x2 + w2)
-                result = Side.RIGHT;
-        }
+        // right
+        else if(
+                (
+                    (y1 + h1 > y2 + h2 && y1 < y2) ||
+                    (y1 + h1 < y2 + h2 && y1 > y2) ||
+                    (y1 >= y2 && y1 < y2 + h2) ||
+                    (y1 + h1 > y2 && y1 + h1 <= y2 + h2)
+                ) &&
+                    (x1 + w1 >= x2 && x1 + w1 < x2 + w2)
+        )
+            result = Side.RIGHT;
 
-        // ---- in (second object into the first one)
-        if(
-                result == null &&
-                (y1 + h1 >= y2 + h2 && y1 <= y2) &&
-                (x1 <= x2 && x1 + w1 >= x2 + w2)
+        // in (second object into the first one)
+        else if(
+            (y1 + h1 >= y2 + h2 && y1 <= y2) &&
+            (x1 <= x2 && x1 + w1 >= x2 + w2)
         )
             result = Side.IN;
 

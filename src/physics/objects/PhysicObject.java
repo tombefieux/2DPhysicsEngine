@@ -1,7 +1,7 @@
 package physics.objects;
 
 import javafx.geometry.Point2D;
-import com.sun.javafx.geom.Rectangle;
+import javafx.scene.shape.Rectangle;
 import physics.Side;
 import physics.Updatable;
 
@@ -64,7 +64,7 @@ public abstract class PhysicObject implements Updatable {
 	 * @return the position
 	 */
 	public Point2D getPosition() {
-		return new Point2D(this.hitbox.x, this.hitbox.y);
+		return new Point2D(this.hitbox.getX(), this.hitbox.getY());
 	}
 	
 	/**
@@ -72,8 +72,8 @@ public abstract class PhysicObject implements Updatable {
 	 * @param position: the position
 	 * @return 
 	 */
-	public void setPosition(Point2D point2d) {
-		this.hitbox.setBounds(new Rectangle((int) point2d.getX(), (int) point2d.getY(), this.hitbox.width, this.hitbox.height));
+	public void setPosition(Point2D position) {
+		this.hitbox = new Rectangle(position.getX(), position.getY(), this.hitbox.getWidth(), this.hitbox.getHeight());
 	}
 	
 	/**

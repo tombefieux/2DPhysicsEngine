@@ -1,8 +1,7 @@
 package physics.objects;
 
-import com.sun.javafx.geom.Rectangle;
-
 import javafx.geometry.Point2D;
+import javafx.scene.shape.Rectangle;
 
 /**
  * This class represents an physic entity for the physics engine.
@@ -44,8 +43,8 @@ public abstract class PhysicEntity extends PhysicObject {
 	@Override
 	public void update(float delta) {
 		// change the position of the object with velocity
-		int x = (int) (this.getPosition().getX() + this.velocity.getX() * delta);
-		int y = (int) (this.getPosition().getY() + this.velocity.getY() * delta);
+		double x = this.getPosition().getX() + this.velocity.getX() * delta;
+		double y = this.getPosition().getY() + this.velocity.getY() * delta;
 		setPosition(new Point2D(x, y));
 	}
 
