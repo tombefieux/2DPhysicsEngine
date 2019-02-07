@@ -43,9 +43,18 @@ public abstract class PhysicEntity extends PhysicObject {
 	@Override
 	public void update(float delta) {
 		// change the position of the object with velocity
+		setPosition(getNextPosition(delta));
+	}
+
+	/**
+	 * This function returns the next position according with the velocity with a delta.
+	 * @param delta: the delta time
+	 * @return the next position
+	 */
+	public Point2D getNextPosition(float delta) {
 		double x = this.getPosition().getX() + this.velocity.getX() * delta;
 		double y = this.getPosition().getY() + this.velocity.getY() * delta;
-		setPosition(new Point2D(x, y));
+		return new Point2D(x, y);
 	}
 
 	/**
