@@ -20,7 +20,7 @@ public class Main {
          * We can resume the disposition of the objects like this :
          *
          *
-         * ////////////////////////////////////////////         y = 300
+         * ////////////////////////////////////////////         y = 0
          * /                                          /
          * /                                          /
          * /                                          /
@@ -32,7 +32,7 @@ public class Main {
          * /                                          /
          * /                                          /
          * /                                          /
-         * ////////////////////////////////////////////         y = 200
+         * ////////////////////////////////////////////         y = 100
          *
          *
          *
@@ -45,11 +45,11 @@ public class Main {
          *     |
          *     |
          *
-         * ////////////         y = 64
+         * ////////////         y = 300
          * /          /
          * /  Player  /
          * /          /
-         * ////////////         y = 0
+         * ////////////         y = 364
          *
          *
          * x = 0
@@ -60,13 +60,13 @@ public class Main {
         // create two objects
         // a wall
         Wall wall = new Wall();
-        wall.setHitbox(new Rectangle(0, 200, 100, 100));
+        wall.setHitbox(new Rectangle(0, 0, 100, 100));
         wall.setName("Wall");
 
         // a player
         Player player = new Player();
-        player.setHitbox(new Rectangle(0, 0, 64, 64));
-        player.setVelocity(new Point2D(0, 50)); // apply a velocity
+        player.setHitbox(new Rectangle(0, 300, 64, 64));
+        player.setVelocity(new Point2D(0, -50)); // apply a velocity
         player.setName("Player");
 
         // create engine
@@ -79,8 +79,8 @@ public class Main {
 
         /*
          * We are at 50 units of distance per second and we are at 30 FPS.
-         * We need to browse at least 134 units of distance.
-         * So the engine must take 134 / 50 = 2.68 seconds before the collision with the wall.
+         * We need to browse at least 200 units of distance.
+         * So the engine must take 200 / 50 = 4 seconds before the collision with the wall.
          */
         long start = System.currentTimeMillis();
 
@@ -105,7 +105,7 @@ public class Main {
         }
 
         System.out.println("Time before collision: " + (System.currentTimeMillis() - start) / 1000.f + "s");
-        System.out.println("(The difference with 2.68s is because of the println)");
+        System.out.println("(The difference with 4s is because of the println)");
     }
 
 }

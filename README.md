@@ -1,8 +1,8 @@
 # 2D Physics Engine
 
 A very basic 2D physics engine in JAVA with rectangular hit box.
-You can use it if you want to develop simple games like pacman for instance.
-The origin of the engine is the bottom-left corner.
+You can use it if you want to develop simple games like Pacman for instance.
+The origin of the engine is the top-left corner.
 
 ## How does it work ?
 The project contains physical objects and the physics engine itself.

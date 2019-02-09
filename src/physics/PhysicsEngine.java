@@ -14,7 +14,7 @@ import java.util.List;
  * updates all the objects for a delta (in second) and handles all the collisions between the objects.
  * When objects are in collision, their function called "collisionTriggeredOnSide" is used.
  *
- * IMPORTANT : The origin is the bottom-left corner.
+ * IMPORTANT : The origin is the top-left corner.
  *
  * @author Tom Befieux
  *
@@ -60,16 +60,26 @@ public class PhysicsEngine {
     private Side calculateCollision(PhysicObject firstObject, PhysicObject secondObject) {
         if(firstObject == null || secondObject == null) return null;
 
-        return calculateCollision(firstObject.getHitbox(), secondObject.getHitbox());
+        Point2D veloOne = new Point2D(0, 0);
+        Point2D veloTwo = new Point2D(0, 0);
+
+        if(firstObject instanceof PhysicEntity)
+            veloOne = ((PhysicEntity) firstObject).getVelocity();
+        if(secondObject instanceof PhysicEntity)
+            veloTwo = ((PhysicEntity) secondObject).getVelocity();
+
+        return calculateCollision(firstObject.getHitbox(), veloOne, secondObject.getHitbox(), veloTwo);
     }
 
     /**
      * This function gets the collisions between two hit box.
      * @param firstHitbox: the first object
      * @param secondHitbox: the second object
+     * @param firstHitboxVelocity: the velocity of the first hit box
+     * @param secondHitboxVelocity: the velocity of the second hit box
      * @return null if there is no collision or the side of the first hit box where the collision happened
      */
-    private Side calculateCollision(Rectangle firstHitbox, Rectangle secondHitbox) {
+    private Side calculateCollision(Rectangle firstHitbox, Point2D firstHitboxVelocity, Rectangle secondHitbox, Point2D secondHitboxVelocity) {
 
         if(firstHitbox == null || secondHitbox == null) return null;
 
@@ -93,49 +103,57 @@ public class PhysicsEngine {
                                 (x1 + w1 > x2 && x1 + w1 <= x2 + w2) ||
                                 (x1 < x2 && x1 + w1 > x2 + w2)
                 ) &&
-                        (y1 <= y2 + h2 && y1 > y2)
+                        (y2 < y1 + h1 && y1 < y2 && y2 + h2 > y1 + h1)
+                &&
+                        (firstHitboxVelocity.getY() > 0 || secondHitboxVelocity.getY() < 0)
         )
             result = Side.BOTTOM;
 
         // top
-        else if (
+        if (
                 (
                         (x1 > x2 && x1 + w1 < x2 + w2) ||
                                 (x1 >= x2 && x1 < x2 + w2) ||
                                 (x1 + w1 > x2 && x1 + w1 <= x2 + w2) ||
                                 (x1 < x2 && x1 + w1 > x2 + w2)
                 ) &&
-                        (y1 + h1 > y2 && y1 + h1 < y2 + h2)
+                        (y2 + h2 > y1 && y2 + h2 < y1 + h1 && y2 < y1)
+                &&
+                        (firstHitboxVelocity.getY() < 0 || secondHitboxVelocity.getY() > 0)
         )
             result = Side.TOP;
 
         // left
-        else if (
+        if (
                 (
                         (y1 + h1 > y2 + h2 && y1 < y2) ||
                                 (y1 + h1 < y2 + h2 && y1 > y2) ||
                                 (y1 >= y2 && y1 < y2 + h2) ||
                                 (y1 + h1 > y2 && y1 + h1 <= y2 + h2)
                 ) &&
-                        (x1 < x2 + w2 && x1 > x2)
+                        (x1 < x2 + w2 && x1 > x2 && x1 + w1 > x2)
+                &&
+                        (firstHitboxVelocity.getX() < 0 || secondHitboxVelocity.getX() > 0)
         )
             result = Side.LEFT;
 
         // right
-        else if(
+        if(
                 (
                         (y1 + h1 > y2 + h2 && y1 < y2) ||
                                 (y1 + h1 < y2 + h2 && y1 > y2) ||
                                 (y1 >= y2 && y1 < y2 + h2) ||
                                 (y1 + h1 > y2 && y1 + h1 <= y2 + h2)
                 ) &&
-                        (x1 + w1 >= x2 && x1 + w1 < x2 + w2)
+                        (x1 + w1 >= x2 && x1 + w1 < x2 + w2 && x2 + w2 > x1 + w1)
+                &&
+                        (firstHitboxVelocity.getX() > 0 || secondHitboxVelocity.getX() < 0)
         )
             result = Side.RIGHT;
 
         // in (second object into the first one)
         else if(
-                (y1 + h1 >= y2 + h2 && y1 <= y2) &&
+                (y1 + h1 <= y2 + h2 && y1 >= y2) &&
                         (x1 <= x2 && x1 + w1 >= x2 + w2)
         )
             result = Side.IN;
@@ -154,18 +172,22 @@ public class PhysicsEngine {
         boolean result = false;
         Point2D nextPos = entity.getNextPosition(delta);
         Rectangle hitbox = new Rectangle(nextPos.getX(), nextPos.getY(), entity.getHitbox().getWidth(), entity.getHitbox().getHeight());
+        Point2D veloOne = entity.getVelocity();
+
 
         for (PhysicObject temp : objects) {
             if(temp != entity) {
                 Rectangle tempHitbox = temp.getHitbox();
+                Point2D veloTwo = new Point2D(0, 0);
 
                 // if it's an entity
                 if (temp instanceof PhysicEntity) {
                     Point2D tempNextPos = ((PhysicEntity) temp).getNextPosition(delta);
                     tempHitbox = new Rectangle(tempNextPos.getX(), tempNextPos.getY(), temp.getHitbox().getWidth(), temp.getHitbox().getHeight());
+                    veloTwo = ((PhysicEntity) temp).getVelocity();
                 }
 
-                if (calculateCollision(hitbox, tempHitbox) != null)
+                if (calculateCollision(hitbox, veloOne, tempHitbox, veloTwo) != null)
                     result = true;
             }
         }
