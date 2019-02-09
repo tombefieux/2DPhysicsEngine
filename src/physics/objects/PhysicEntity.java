@@ -58,6 +58,14 @@ public abstract class PhysicEntity extends PhysicObject {
 	}
 
 	/**
+	 * This function returns if the entity is moving.
+	 * @return if the entity is moving
+	 */
+	public boolean isMoving() {
+		return (getVelocity().getY() != 0 || getVelocity().getX() != 0);
+	}
+
+	/**
 	 * To add a velocity to the object.
 	 * @param velocity: the velocity
 	 */
