@@ -2,7 +2,13 @@ import javafx.geometry.Point2D;
 import javafx.scene.shape.Rectangle;
 import physics.PhysicsEngine;
 import testObjects.Player;
+import testObjects.Util.MyImagePatternLoader;
 import testObjects.Wall;
+
+import javax.imageio.ImageIO;
+import java.awt.image.BufferedImage;
+import java.io.File;
+import java.io.IOException;
 
 /**
  * This class is a test class for the engine.
@@ -56,23 +62,43 @@ public class Main {
          *
          */
 
+        // init variables
+        PhysicsEngine engine = null;
+        Player player = null;
 
-        // create two objects
-        // a wall
-        Wall wall = new Wall();
-        wall.setHitbox(new Rectangle(0, 0, 100, 100));
-        wall.setName("Wall");
+        boolean createEngineWithPattern = true; // you can change the value to create objects
 
-        // a player
-        Player player = new Player();
-        player.setHitbox(new Rectangle(0, 300, 64, 64));
-        player.setVelocity(new Point2D(0, -50)); // apply a velocity
-        player.setName("Player");
+        if(createEngineWithPattern) {
+            try {
+                BufferedImage patternImage = ImageIO.read(new File("assets/images/pattern.png"));
 
-        // create engine
-        PhysicsEngine engine = new PhysicsEngine();
-        engine.addObject(wall);
-        engine.addObject(player);
+                MyImagePatternLoader loader = new MyImagePatternLoader();
+                engine = loader.getEngineWithPatternImage(patternImage);
+                player = (Player) engine.getObjectsByName("Player").get(0);
+
+            } catch (IOException e) {
+                System.out.println("Impossible to load the pattern image.");
+            }
+        }
+
+        else if(engine == null){
+            // create two objects
+            // a wall
+            Wall wall = new Wall();
+            wall.setHitbox(new Rectangle(0, 0, 100, 100));
+            wall.setName("Wall");
+
+            // a player
+            player = new Player();
+            player.setHitbox(new Rectangle(0, 300, 64, 64));
+            player.setVelocity(new Point2D(0, -50)); // apply a velocity
+            player.setName("Player");
+
+            // create engine
+            engine = new PhysicsEngine();
+            engine.addObject(wall);
+            engine.addObject(player);
+        }
 
         // the FPS
         final int FPS = 30;

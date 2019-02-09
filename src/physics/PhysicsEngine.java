@@ -220,4 +220,19 @@ public class PhysicsEngine {
     public List<PhysicObject> getObjects() {
         return objects;
     }
+
+    /**
+     * Returns the objects of the engine with a specific name.
+     * @param name: the name
+     * @return the list of objects
+     */
+    public List<PhysicObject> getObjectsByName(String name) {
+        List<PhysicObject> result = new ArrayList<>();
+
+        for (PhysicObject object : this.objects)
+            if(object.getName().equals(name))
+                result.add(object);
+
+        return result;
+    }
 }
