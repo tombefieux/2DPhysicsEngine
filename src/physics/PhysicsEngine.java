@@ -105,7 +105,10 @@ public class PhysicsEngine {
                 ) &&
                         (y2 < y1 + h1 && y1 < y2 && y2 + h2 > y1 + h1)
                 &&
-                        (firstHitboxVelocity.getY() > 0 || secondHitboxVelocity.getY() < 0)
+                        (firstHitboxVelocity.getY() > 0 || secondHitboxVelocity.getY() < 0 ||
+                                (firstHitboxVelocity.getY() == 0 && secondHitboxVelocity.getY() == 0 &&
+                                        firstHitboxVelocity.getX() == 0 && secondHitboxVelocity.getX() == 0)
+                        )
         )
             result = Side.BOTTOM;
 
@@ -119,7 +122,10 @@ public class PhysicsEngine {
                 ) &&
                         (y2 + h2 > y1 && y2 + h2 < y1 + h1 && y2 < y1)
                 &&
-                        (firstHitboxVelocity.getY() < 0 || secondHitboxVelocity.getY() > 0)
+                        (firstHitboxVelocity.getY() < 0 || secondHitboxVelocity.getY() > 0 ||
+                                (firstHitboxVelocity.getY() == 0 && secondHitboxVelocity.getY() == 0 &&
+                                        firstHitboxVelocity.getX() == 0 && secondHitboxVelocity.getX() == 0)
+                        )
         )
             result = Side.TOP;
 
@@ -133,7 +139,10 @@ public class PhysicsEngine {
                 ) &&
                         (x1 < x2 + w2 && x1 > x2 && x1 + w1 > x2)
                 &&
-                        (firstHitboxVelocity.getX() < 0 || secondHitboxVelocity.getX() > 0)
+                        (firstHitboxVelocity.getX() < 0 || secondHitboxVelocity.getX() > 0 ||
+                                (firstHitboxVelocity.getY() == 0 && secondHitboxVelocity.getY() == 0 &&
+                                        firstHitboxVelocity.getX() == 0 && secondHitboxVelocity.getX() == 0)
+                        )
         )
             result = Side.LEFT;
 
@@ -147,14 +156,17 @@ public class PhysicsEngine {
                 ) &&
                         (x1 + w1 >= x2 && x1 + w1 < x2 + w2 && x2 + w2 > x1 + w1)
                 &&
-                        (firstHitboxVelocity.getX() > 0 || secondHitboxVelocity.getX() < 0)
+                        (firstHitboxVelocity.getX() > 0 || secondHitboxVelocity.getX() < 0 ||
+                                (firstHitboxVelocity.getY() == 0 && secondHitboxVelocity.getY() == 0 &&
+                                        firstHitboxVelocity.getX() == 0 && secondHitboxVelocity.getX() == 0)
+                        )
         )
             result = Side.RIGHT;
 
-        // in (second object into the first one)
-        else if(
-                (y1 + h1 <= y2 + h2 && y1 >= y2) &&
-                        (x1 <= x2 && x1 + w1 >= x2 + w2)
+        // in (first object into the second one)
+        if(
+                (y1 + h1 < y2 + h2 && y1 > y2) &&
+                        (x1 > x2 && x1 + w1 < x2 + w2)
         )
             result = Side.IN;
 
@@ -165,11 +177,11 @@ public class PhysicsEngine {
      * This function returns if there is a collision on this entity on the next update.
      * @param entity: the object
      * @param delta: the delta to apply
-     * @return if there is no collision with object or not
+     * @return the object with which the collision will happen or null
      */
-    public boolean collisionOnNextUpdate(PhysicEntity entity, float delta) {
+    public PhysicObject collisionOnNextUpdate(PhysicEntity entity, float delta) {
 
-        boolean result = false;
+        PhysicObject result = null;
         Point2D nextPos = entity.getNextPosition(delta);
         Rectangle hitbox = new Rectangle(nextPos.getX(), nextPos.getY(), entity.getHitbox().getWidth(), entity.getHitbox().getHeight());
         Point2D veloOne = entity.getVelocity();
@@ -188,9 +200,31 @@ public class PhysicsEngine {
                 }
 
                 if (calculateCollision(hitbox, veloOne, tempHitbox, veloTwo) != null)
-                    result = true;
+                    result = temp;
             }
         }
+
+        return result;
+    }
+
+    /**
+     * This function returns all the objects around the object in parameter with a perimeter.
+     * @param object: the object
+     * @param perimeter: the perimeter around the object
+     * @return the objects around
+     */
+    public List<PhysicObject> getObjectsAround(PhysicObject object, int perimeter) {
+        List<PhysicObject> result = new ArrayList<>();
+        Rectangle perimeterRectangle = new Rectangle(
+                object.getHitbox().getX() - perimeter,
+                object.getHitbox().getY() - perimeter,
+                object.getHitbox().getWidth() + perimeter * 2,
+                object.getHitbox().getHeight() + perimeter * 2
+        );
+
+        for (PhysicObject temp: this.objects)
+            if(temp != object && calculateCollision(perimeterRectangle, new Point2D(0, 0), temp.getHitbox(), new Point2D(0, 0)) != null)
+                result.add(temp);
 
         return result;
     }

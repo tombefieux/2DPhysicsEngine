@@ -117,7 +117,7 @@ public class Main {
             engine.update(1 / (float) FPS);
 
             // see if the player will hit the wall on the next update
-            if(engine.collisionOnNextUpdate(player, 1 / (float) FPS) && player.getVelocity().getY() != 0)
+            if(engine.collisionOnNextUpdate(player, 1 / (float) FPS) instanceof Wall && player.getVelocity().getY() != 0)
                 System.out.println("I will hit something on the next update :'(");
 
             // print the y position
