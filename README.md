@@ -18,11 +18,22 @@ The physics engine applies the changes to the objects (as moving the entities ac
 
 
 ## Getting Started
-Copy the physics package of this repository in your project to use this project. Then you have two options to create an engine:
+Copy the physics package of this repository in your project to use it. Then you have to create your game objects and create your engine. You have two options to create an engine.
+
+### Create your objects
+Create your game objects extended of the PhysicObject or of the PhysicEntity class. When you extended these classes you have to implement
+this function:
+```
+public void collisionTriggeredOnSide(Side side, PhysicObject object);
+```
+This function is called when a collision happens with another physical object. The side of the object where the collision happened and the
+other object with which the collision happened is given. With this method you can easily write the actions to perform when there is a collision
+with a specific type of object.
 
 ### First option: create an engine with a pattern image
 You can use a pattern image to load a map easily. A pattern image is an image in grayscale containing colored rectangles. One rectangle represents
 an object, depending of its color. So you can store 255 types of objects in a pattern image and you don't have limit concerning its size.
+
 
 #### 1) Implement a loader
 To load a pattern image, you need to create a class extended of the abstract class ObjectsImageLoader. In this new class you need to give the list
@@ -34,18 +45,6 @@ We you've created it, you can instance your loader and use the getEngineWithPatt
 This function gives you directly the engine corresponding to your pattern image!
 
 ### Second option: create an engine from scratch
-
-#### 1) Create your objects
-Create your game objects extended of the PhysicObject or of the PhysicEntity class. When you extended these classes you have to implement
-this function:
-```
-public void collisionTriggeredOnSide(Side side, PhysicObject object);
-```
-This function is called when a collision happens with another physical object. The side of the object where the collision happened and the
-other object with which the collision happened is given. With this method you can easily write the actions to perform when there is a collision
-with a specific type of object.
-
-#### 2) Create an engine
 Create a physics engine object and add all the physical objects that you've created into it. 
 
 ### You're done!
