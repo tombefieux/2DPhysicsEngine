@@ -19,7 +19,7 @@ import java.util.List;
  * @author Tom Befieux
  *
  */
-public class PhysicsEngine {
+public class PhysicsEngine implements Updatable {
 
     protected List<PhysicObject> objects;             /** All the objects handled by the engine. */
 
