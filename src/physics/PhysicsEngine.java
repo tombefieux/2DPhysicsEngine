@@ -41,14 +41,52 @@ public class PhysicsEngine implements Updatable {
             object.update(delta);
 
         // look for collisions
-        for (PhysicObject firstObject : objects)
-            for (PhysicObject secondObject : objects) {
-                if(firstObject != secondObject) {
-                    Side result = calculateCollision(firstObject, secondObject);
-                    if (result != null)
-                        firstObject.collisionTriggeredOnSide(result, secondObject);
+        for (int i = 0; i < objects.size(); i++)
+            for (int j = i + 1; j < objects.size(); j++) {
+                Side result = calculateCollision(objects.get(i), objects.get(j));
+                if (result != null) {
+                    objects.get(i).collisionTriggeredOnSide(result, objects.get(j));
+                    objects.get(j).collisionTriggeredOnSide(getOppositeSide(result), objects.get(i));
                 }
             }
+    }
+
+    /**
+     * This function returns the opposite side of a side in parameter
+     * @param side: the side
+     * @return the opposite side
+     */
+    public Side getOppositeSide(Side side)
+    {
+        Side result = null;
+
+        switch (side){
+            case TOP:
+                result = Side.BOTTOM;
+                break;
+
+            case BOTTOM:
+                result = Side.TOP;
+                break;
+
+            case LEFT:
+                result = Side.RIGHT;
+                break;
+
+            case RIGHT:
+                result = Side.LEFT;
+                break;
+
+            case IN:
+                result = Side.AROUND;
+                break;
+
+            case AROUND:
+                result = Side.IN;
+                break;
+        }
+
+        return result;
     }
 
     /**

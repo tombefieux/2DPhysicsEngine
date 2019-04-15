@@ -133,5 +133,4 @@ public class Main {
         System.out.println("Time before collision: " + (System.currentTimeMillis() - start) / 1000.f + "s");
         System.out.println("(The difference with 4s is because of the println)");
     }
-
 }

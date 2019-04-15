@@ -10,5 +10,6 @@ public enum Side {
     LEFT,
     BOTTOM,
     TOP,
-    IN
+    IN,
+    AROUND
 }
