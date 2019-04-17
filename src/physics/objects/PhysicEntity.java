@@ -70,7 +70,7 @@ public abstract class PhysicEntity extends PhysicObject {
 	 * @param velocity: the velocity
 	 */
 	public void addVelocity(Point2D velocity) {
-		this.velocity.add(velocity);
+		this.velocity = new Point2D(this.velocity.getX() + velocity.getX(), this.velocity.getY() + velocity.getY());
 	}
 	
 	/**
@@ -78,7 +78,7 @@ public abstract class PhysicEntity extends PhysicObject {
 	 * @param velocity: the velocity
 	 */
 	public void subtractVelocity(Point2D velocity) {
-		this.velocity.subtract(velocity);
+		this.velocity = new Point2D(this.velocity.getX() - velocity.getX(), this.velocity.getY() - velocity.getY());
 	}
 	
 	/**

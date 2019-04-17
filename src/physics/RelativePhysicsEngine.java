@@ -40,6 +40,21 @@ public class RelativePhysicsEngine extends PhysicsEngine {
         focusOnReferenceObject();
     }
 
+    public RelativePhysicsEngine(float gravityValue, Direction gravityDirection, int screenWidth, int screenHeight) {
+        super(gravityValue, gravityDirection);
+
+        this.libertyWidth = 0;
+        this.libertyHeight = 0;
+        this.screenWidth = screenWidth;
+        this.screenHeight = screenHeight;
+        this.xPlan = 0;
+        this.yPlan = 0;
+        this.currentXLiberty = 0;
+        this.currentYLiberty = 0;
+
+        focusOnReferenceObject();
+    }
+
     /**
      * This function returns the relative position of an object according to the reference object.
      * @param object: the object

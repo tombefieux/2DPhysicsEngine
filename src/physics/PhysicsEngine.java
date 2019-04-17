@@ -14,6 +14,9 @@ import java.util.List;
  * updates all the objects for a delta (in second) and handles all the collisions between the objects.
  * When objects are in collision, their function called "collisionTriggeredOnSide" is used.
  *
+ * The engine can handle gravity. The PhysicObjects are considered as walls and the entities will be
+ * stop in their fall by the objects. You can choose the direction of the gravity and it's value.
+ *
  * IMPORTANT : The origin is the top-left corner.
  *
  * @author Tom Befieux
@@ -21,7 +24,16 @@ import java.util.List;
  */
 public class PhysicsEngine implements Updatable {
 
-    protected List<PhysicObject> objects;             /** All the objects handled by the engine. */
+    protected List<PhysicObject> objects;                       /** All the objects handled by the engine. */
+    private boolean useGravity = false;                         /** If the engine use gravity or not. */
+    private Direction gravityDirection = Direction.DOWN;        /** The direction of the gravity. */
+    private Side sideToStopGravityOnCollision = Side.BOTTOM;    /** The side where we need to stop the gravity if there's a collision. */
+
+    /**
+     * The value of the gravity for the engine.
+     * This value is add to the objects every seconds.
+     */
+    private float gravityValue = 7.f;
 
     /**
      * The constructor.
@@ -31,24 +43,132 @@ public class PhysicsEngine implements Updatable {
     }
 
     /**
+     * Constructor with a gravity value. Means that the engine will apply gravity on objects.
+     * @param gravityValue: the gravity value
+     * @param gravityDirection: the direction of the gravity
+     */
+    public PhysicsEngine(float gravityValue, Direction gravityDirection) {
+        this.useGravity = true;
+        this.gravityValue = gravityValue;
+        setGravityDirection(gravityDirection);
+    }
+
+    /**
      * The main function of the engine.
      * This function updates all the objects and handles the collisions.
+     * It also applies the gravity if the engine has to.
      * @param delta: the delta to apply (the time between this update and the previous one usually)
      */
     public void update(float delta) {
-        // update objects
-        for (PhysicObject object : objects)
-            object.update(delta);
 
-        // look for collisions
-        for (int i = 0; i < objects.size(); i++)
+        // for each object -- gravity and update
+        for (int i = 0; i < objects.size(); i++) {
+
+            // apply gravity if it's an entity
+            if (this.useGravity && objects.get(i) instanceof PhysicEntity) {
+                switch (this.gravityDirection) {
+                    case DOWN:
+                        ((PhysicEntity) objects.get(i)).addVelocity(new Point2D(0, this.gravityValue * delta));
+                        break;
+
+                    case UP:
+                        ((PhysicEntity) objects.get(i)).subtractVelocity(new Point2D(0, this.gravityValue * delta));
+                        break;
+
+                    case RIGHT:
+                        ((PhysicEntity) objects.get(i)).addVelocity(new Point2D(this.gravityValue * delta, 0));
+                        break;
+
+                    case LEFT:
+                        ((PhysicEntity) objects.get(i)).subtractVelocity(new Point2D(this.gravityValue * delta, 0));
+                        break;
+                }
+            }
+
+            // update it
+            objects.get(i).update(delta);
+        }
+
+        // for each object -- collisions
+        for (int i = 0; i < objects.size(); i++) {
+            // look for collisions
             for (int j = i + 1; j < objects.size(); j++) {
+
                 Side result = calculateCollision(objects.get(i), objects.get(j));
                 if (result != null) {
+
+                    // if we use gravity
+                    if(this.useGravity) {
+                        // if there's one entity at least
+                        if (objects.get(i) instanceof PhysicEntity || objects.get(j) instanceof PhysicEntity) {
+
+                            // if the objects are not an entity, we check if the collision implies to stop the gravity and we correct the position
+                            if (!(objects.get(i) instanceof PhysicEntity)) {
+                                if (getOppositeSide(result) == this.sideToStopGravityOnCollision || getOppositeSide(result) == Side.AROUND || getOppositeSide(result) == Side.IN) {
+
+                                    // stop velocity
+                                    if(this.sideToStopGravityOnCollision == Side.BOTTOM || this.sideToStopGravityOnCollision == Side.TOP)
+                                        ((PhysicEntity) objects.get(j)).setVelocity(new Point2D(((PhysicEntity) objects.get(j)).getVelocity().getX(), 0));
+                                    else
+                                        ((PhysicEntity) objects.get(j)).setVelocity(new Point2D(0, ((PhysicEntity) objects.get(j)).getVelocity().getY()));
+
+                                    // correct position
+                                    switch (this.sideToStopGravityOnCollision) {
+                                        case LEFT:
+                                            objects.get(j).setPosition(new Point2D(objects.get(i).getPosition().getX() + objects.get(i).getHitbox().getWidth(), objects.get(j).getPosition().getY()));
+                                            break;
+
+                                        case RIGHT:
+                                            objects.get(j).setPosition(new Point2D(objects.get(i).getPosition().getX() - objects.get(j).getHitbox().getWidth(), objects.get(j).getPosition().getY()));
+                                            break;
+
+                                        case BOTTOM:
+                                            objects.get(j).setPosition(new Point2D(objects.get(j).getPosition().getX(), objects.get(i).getPosition().getY() - objects.get(j).getHitbox().getHeight()));
+                                            break;
+
+                                        case TOP:
+                                            objects.get(j).setPosition(new Point2D(objects.get(j).getPosition().getX(), objects.get(i).getPosition().getY() + objects.get(i).getHitbox().getHeight()));
+                                            break;
+                                    }
+                                }
+                            } else if (!(objects.get(j) instanceof PhysicEntity)) {
+                                if (result == this.sideToStopGravityOnCollision || result == Side.AROUND || result == Side.IN) {
+
+                                    // stop velocity
+                                    if(this.sideToStopGravityOnCollision == Side.BOTTOM || this.sideToStopGravityOnCollision == Side.TOP)
+                                        ((PhysicEntity) objects.get(i)).setVelocity(new Point2D(((PhysicEntity) objects.get(i)).getVelocity().getX(), 0));
+                                    else
+                                        ((PhysicEntity) objects.get(i)).setVelocity(new Point2D(0, ((PhysicEntity) objects.get(i)).getVelocity().getY()));
+
+                                    // correct position
+                                    switch (this.sideToStopGravityOnCollision) {
+                                        case LEFT:
+                                            objects.get(i).setPosition(new Point2D(objects.get(j).getPosition().getX() + objects.get(j).getHitbox().getWidth(), objects.get(i).getPosition().getY()));
+                                            break;
+
+                                        case RIGHT:
+                                            objects.get(i).setPosition(new Point2D(objects.get(j).getPosition().getX() - objects.get(i).getHitbox().getWidth(), objects.get(i).getPosition().getY()));
+                                            break;
+
+                                        case BOTTOM:
+                                            objects.get(i).setPosition(new Point2D(objects.get(i).getPosition().getX(), objects.get(j).getPosition().getY() - objects.get(i).getHitbox().getHeight()));
+                                            break;
+
+                                        case TOP:
+                                            objects.get(i).setPosition(new Point2D(objects.get(i).getPosition().getX(), objects.get(j).getPosition().getY() + objects.get(j).getHitbox().getHeight()));
+                                            break;
+                                    }
+                                }
+                            }
+                        }
+                    }
+
+                    // call the collision functions
                     objects.get(i).collisionTriggeredOnSide(result, objects.get(j));
                     objects.get(j).collisionTriggeredOnSide(getOppositeSide(result), objects.get(i));
                 }
             }
+        }
     }
 
     /**
@@ -306,5 +426,51 @@ public class PhysicsEngine implements Updatable {
                 result.add(object);
 
         return result;
+    }
+
+    public boolean isUsingGravity() {
+        return useGravity;
+    }
+
+    public void setUseGravity(boolean useGravity) {
+        this.useGravity = useGravity;
+    }
+
+    public float getGravityValue() {
+        return gravityValue;
+    }
+
+    public void setGravityValue(float gravityValue) {
+        if(gravityValue > 0) {
+            this.useGravity = true;
+            this.gravityValue = gravityValue;
+        }
+    }
+
+    public Direction getGravityDirection() {
+        return gravityDirection;
+    }
+
+    public void setGravityDirection(Direction gravityDirection) {
+        this.gravityDirection = gravityDirection;
+        this.useGravity = true;
+
+        switch (this.gravityDirection) {
+            case DOWN:
+                this.sideToStopGravityOnCollision = Side.BOTTOM;
+                break;
+
+            case UP:
+                this.sideToStopGravityOnCollision = Side.TOP;
+                break;
+
+            case LEFT:
+                this.sideToStopGravityOnCollision = Side.LEFT;
+                break;
+
+            case RIGHT:
+                this.sideToStopGravityOnCollision = Side.RIGHT;
+                break;
+        }
     }
 }
