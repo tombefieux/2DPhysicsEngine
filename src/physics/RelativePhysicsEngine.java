@@ -2,36 +2,32 @@ package physics;
 
 import physics.objects.PhysicObject;
 import javafx.geometry.Point2D;
+import javafx.scene.shape.Rectangle;
 
 
 /**
  * This class extends of the PhysicsEngine. It represents an engine with a relative positions mechanism.
  * It must have a reference object and the positions of the other objects can be given depending of the reference object.
+ * The reference object has a liberty rectangle where is allowed to move without modifications of the positions of the other objects.
+ * To track an object at the middle of the screen you need a rectangle of null width and height and an x equal to the screen width / 2
+ * and a y equal to the screen height / 2.
  */
 public class RelativePhysicsEngine extends PhysicsEngine {
 
     private PhysicObject referenceObject = null;            /** The reference object. */
-    private int libertyWidth;                               /** The width of liberty for the movements of the reference object. */
-    private int libertyHeight;                              /** The height of liberty for the movements of the reference object. */
-    private int screenWidth;                                /** The width of the screen. */
-    private int screenHeight;                               /** The height of the screen. */
-    private double xPlan;                                   /** The x coordinate of the plan. */
-    private double yPlan;                                   /** The y coordinate of the plan. */
+    private Rectangle libertyRectangle;                     /** The rectangle of liberty for the focused object. */
+    private double xPlan;                                   /** The x coordinate of the plan. (top left corner) */
+    private double yPlan;                                   /** The y coordinate of the plan. (top left corner) */
     private double currentXLiberty;                         /** The current liberty of the reference object in x. */
     private double currentYLiberty;                         /** The current liberty of the reference object in y. */
 
     /**
-     * Constructor with the reference object.
-     * @param screenWidth: the width of the screen.
-     * @param screenHeight: the height of the screen.
+     * Constructor.
      */
-    public RelativePhysicsEngine(int screenWidth, int screenHeight)
+    public RelativePhysicsEngine()
     {
         super();
-        this.libertyWidth = 0;
-        this.libertyHeight = 0;
-        this.screenWidth = screenWidth;
-        this.screenHeight = screenHeight;
+        this.libertyRectangle = new Rectangle(0, 0, 0, 0);
         this.xPlan = 0;
         this.yPlan = 0;
         this.currentXLiberty = 0;
@@ -40,13 +36,49 @@ public class RelativePhysicsEngine extends PhysicsEngine {
         focusOnReferenceObject();
     }
 
-    public RelativePhysicsEngine(float gravityValue, Direction gravityDirection, int screenWidth, int screenHeight) {
+    /**
+     * Constructor with a liberty rectangle
+     * @param libertyRectangle: the liberty rectangle
+     */
+    public RelativePhysicsEngine(Rectangle libertyRectangle)
+    {
+        super();
+        this.libertyRectangle = libertyRectangle;
+        this.xPlan = 0;
+        this.yPlan = 0;
+        this.currentXLiberty = 0;
+        this.currentYLiberty = 0;
+
+        focusOnReferenceObject();
+    }
+
+    /**
+     * Constructor to use gravity.
+     * @param gravityValue
+     * @param gravityDirection
+     */
+    public RelativePhysicsEngine(float gravityValue, Direction gravityDirection) {
         super(gravityValue, gravityDirection);
 
-        this.libertyWidth = 0;
-        this.libertyHeight = 0;
-        this.screenWidth = screenWidth;
-        this.screenHeight = screenHeight;
+        this.libertyRectangle = new Rectangle(0, 0, 0, 0);
+        this.xPlan = 0;
+        this.yPlan = 0;
+        this.currentXLiberty = 0;
+        this.currentYLiberty = 0;
+
+        focusOnReferenceObject();
+    }
+
+    /**
+     * Constructor to use gravity.
+     * @param gravityValue
+     * @param gravityDirection
+     * @param libertyRectangle
+     */
+    public RelativePhysicsEngine(float gravityValue, Direction gravityDirection, Rectangle libertyRectangle) {
+        super(gravityValue, gravityDirection);
+
+        this.libertyRectangle = libertyRectangle;
         this.xPlan = 0;
         this.yPlan = 0;
         this.currentXLiberty = 0;
@@ -74,27 +106,27 @@ public class RelativePhysicsEngine extends PhysicsEngine {
 
         // x
         this.currentXLiberty += movementOfFocusedObject.getX();
-        if(Math.abs(this.currentXLiberty) > this.libertyWidth / 2.d) {
+        if(Math.abs(this.currentXLiberty) > this.libertyRectangle.getWidth() / 2.d) {
             if(this.currentXLiberty < 0) {
-                this.xPlan -= Math.abs(this.libertyWidth / 2.d - Math.abs(this.currentXLiberty));
-                this.currentXLiberty = -1 * (this.libertyWidth / 2.d);
+                this.xPlan -= Math.abs(this.libertyRectangle.getWidth() / 2.d - Math.abs(this.currentXLiberty));
+                this.currentXLiberty = -1 * (this.libertyRectangle.getWidth() / 2.d);
             }
             else {
-                this.xPlan += Math.abs(this.libertyWidth / 2.d - Math.abs(this.currentXLiberty));
-                this.currentXLiberty = this.libertyWidth / 2.d;
+                this.xPlan += Math.abs(this.libertyRectangle.getWidth() / 2.d - Math.abs(this.currentXLiberty));
+                this.currentXLiberty = this.libertyRectangle.getWidth() / 2.d;
             }
         }
 
         // y
         this.currentYLiberty += movementOfFocusedObject.getY();
-        if(Math.abs(this.currentYLiberty) > this.libertyHeight / 2.d) {
+        if(Math.abs(this.currentYLiberty) > this.libertyRectangle.getHeight() / 2.d) {
             if(this.currentYLiberty < 0) {
-                this.yPlan -= Math.abs(this.libertyHeight / 2.d - Math.abs(this.currentYLiberty));
-                this.currentYLiberty = -1 * (this.libertyHeight / 2.d);
+                this.yPlan -= Math.abs(this.libertyRectangle.getHeight() / 2.d - Math.abs(this.currentYLiberty));
+                this.currentYLiberty = -1 * (this.libertyRectangle.getHeight() / 2.d);
             }
             else {
-                this.yPlan += Math.abs(this.libertyHeight / 2.d - Math.abs(this.currentYLiberty));
-                this.currentYLiberty = this.libertyHeight / 2.d;
+                this.yPlan += Math.abs(this.libertyRectangle.getHeight() / 2.d - Math.abs(this.currentYLiberty));
+                this.currentYLiberty = this.libertyRectangle.getHeight() / 2.d;
             }
         }
     }
@@ -104,8 +136,10 @@ public class RelativePhysicsEngine extends PhysicsEngine {
      * @param newReferenceObject: the new reference object (must be in the engine)
      */
     public void setReferenceObject(PhysicObject newReferenceObject) {
-        if(objects.contains(newReferenceObject))
+        if(objects.contains(newReferenceObject)) {
             referenceObject = newReferenceObject;
+            focusOnReferenceObject();
+        }
     }
 
     /**
@@ -113,63 +147,25 @@ public class RelativePhysicsEngine extends PhysicsEngine {
      */
     public void focusOnReferenceObject() {
         if(referenceObject != null) {
-            this.xPlan = referenceObject.getHitbox().getX() + referenceObject.getHitbox().getWidth() / 2 - screenWidth / 2.d;
-            this.yPlan = referenceObject.getHitbox().getY() + referenceObject.getHitbox().getHeight() / 2 - screenHeight / 2.d;
+            this.xPlan = referenceObject.getHitbox().getX() + referenceObject.getHitbox().getWidth() / 2 - (this.libertyRectangle.getWidth() / 2.d + this.libertyRectangle.getX());
+            this.yPlan = referenceObject.getHitbox().getY() + referenceObject.getHitbox().getHeight() / 2 - (this.libertyRectangle.getHeight() / 2.d + this.libertyRectangle.getY());
             this.currentXLiberty = 0;
             this.currentYLiberty = 0;
         }
     }
 
-    public int getLibertyWidth() {
-        return libertyWidth;
+    public Rectangle getLibertyRectangle() {
+        return libertyRectangle;
     }
 
     /**
      * To change the width of liberty of movements for the reference object.
      * To focus on the reference object all the time, send 0.
-     * @param libertyWidth
+     * @param libertyRectangle: the new rectangle of liberty
      */
-    public void setLibertyWidth(int libertyWidth) {
-        if (libertyWidth >= 0) {
-            this.libertyWidth = libertyWidth;
-            focusOnReferenceObject();
-        }
-    }
-
-    public int getLibertyHeight() {
-        return libertyHeight;
-    }
-
-    /**
-     * To change the height of liberty of movements for the reference object.
-     * To focus on the reference object all the time, send 0.
-     * @param libertyHeight
-     */
-    public void setLibertyHeight(int libertyHeight) {
-        if(libertyHeight >= 0) {
-            this.libertyHeight = libertyHeight;
-            focusOnReferenceObject();
-        }
-    }
-
-    public int getScreenWidth() {
-        return screenWidth;
-    }
-
-    public void setScreenWidth(int screenWidth) {
-        if(screenWidth >= 0) {
-            this.screenWidth = screenWidth;
-            focusOnReferenceObject();
-        }
-    }
-
-    public int getScreenHeight() {
-        return screenHeight;
-    }
-
-    public void setScreenHeight(int screenHeight) {
-        if (screenHeight >= 0) {
-            this.screenHeight = screenHeight;
+    public void setLibertyRectangle(Rectangle libertyRectangle) {
+        if (libertyRectangle.getWidth() >= 0 && libertyRectangle.getHeight() >= 0 && libertyRectangle.getX() >= 0 && libertyRectangle.getY() >= 0) {
+            this.libertyRectangle = libertyRectangle;
             focusOnReferenceObject();
         }
     }
